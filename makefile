@@ -21,3 +21,6 @@ start:
 	aws --endpoint-url=http://localhost:4566 s3 cp teste-content s3://mybucket-1/ --recursive
 
 	rm -r teste-content
+
+build:
+	docker build -t lucasfdutra/s3-explorer-back .
