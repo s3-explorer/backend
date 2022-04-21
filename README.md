@@ -5,9 +5,7 @@
 então execute os comandos na ordem:
 
 ```sh
-docker-compose up -d
-sleep 60 # aguarde um pouco para que os containers subam normalmente
-makefile start-localstack
+makefile start
 ```
 
 O endpoint do flask ficará na porta 5000 e o swagger ficará na 8080

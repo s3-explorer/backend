@@ -1,6 +1,10 @@
 n ?= 10
 
-start-localstack:
+start:
+	docker-compose up -d
+
+	sleep 60
+
 	mkdir teste-content
 	mkdir teste-content/folder-01
 
