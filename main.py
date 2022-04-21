@@ -221,8 +221,8 @@ def search_object():
         return 'Oops! ocorreu um erro inesperado', 500
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
+    # from dotenv import load_dotenv
+    # load_dotenv()
 
     os.environ['FLASK_ENV'] = 'development'
     app.run(host='0.0.0.0', port=5000)

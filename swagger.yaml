@@ -1,0 +1,199 @@
+openapi: 3.0.0
+
+info:
+  title: API s3-explorer
+  version: 1.0.0
+  
+servers:
+  - url: http://localhost:5000
+
+components:
+  schemas:
+    Object:
+      type: object
+      properties:
+        is_folder: 
+          type: boolean
+        key:
+          type: string
+        last_modified:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+    Objects:
+      type: array
+      items:
+        $ref: '#/components/schemas/Object'
+    SearchObject:
+      type: object
+      properties:
+        key:
+          type: string
+        last_modified:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+    SearchObjects:
+      type: array
+      items:
+        $ref: '#/components/schemas/SearchObject'
+    GetObjectsRes:
+      type: object
+      properties:
+        next_continuation_token:
+          type: string
+        objects:
+          $ref: '#/components/schemas/Objects'
+    SearchObjectsRes:
+      type: object
+      properties:
+        next_continuation_token:
+          type: string
+        objects:
+          $ref: '#/components/schemas/SearchObjects'
+
+paths:
+  /api/get_buckets:
+    get:
+      summary: Retorna uma lista de Buckets
+      description: Retorna todos os buckets permitidos 
+      responses:
+        200:
+          description: Retorna a lista de buckets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["mybucket-01", "mybucket-02"]
+        500:
+          description: Falha ao se conectar com os serviços do s3
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Oops! ocorreu um erro inesperado
+  
+  /api/get_object_list:
+    get:
+      summary: Lista de pastas e arquivos do diretório
+      description: Retorna uma lista das pastas e até 1000 arquivos de um dado diretório
+      parameters:
+        - in: header
+          name: x-bucket
+          schema:
+            type: string
+          required: true
+          description: Nome do bucket que está consultando
+        - in: header
+          name: x-prefix
+          schema:
+            type: string
+          required: false
+          description: Caminho até a pasta que se encontra no bucket
+        - in: header
+          name: x-next-continuation-token
+          schema:
+            type: string
+          required: false
+          description: Token de continuidade que indica ponto de carregamento para proximas consultas
+      responses:
+        200:
+          description: Retorna a lista de objetos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetObjectsRes'
+        500:
+          description: Falha ao se conectar com os serviços do s3
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Oops! ocorreu um erro inesperado
+
+  /api/download_object:
+    get:
+      tags: 
+        - "Só para saber separar"
+      summary: Retorna o link para download de um objet
+      description: Retorna o link para download de um objet
+      parameters:
+        - in: header
+          name: x-bucket
+          schema:
+            type: string
+          required: true
+          description: Nome do bucket que o objeto a ser baixado está
+        - in: header
+          name: x-key-name
+          schema:
+            type: string
+          required: true
+          description: Caminho completo até o arquivo
+      responses:
+        200:     
+          description: Retorna o link
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: http://localhost:5000/file-01.csv
+        500:
+          description: Falha ao se conectar com os serviços do s3
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Oops! ocorreu um erro inesperado
+
+  /api/search_object:
+    get:
+      summary: Retorna uma lista de objetos de acordo com uma pesquisa
+      description: Retorna uma lista de objetos de acordo com uma pesquisa
+      parameters:
+        - in: header
+          name: x-bucket
+          schema:
+            type: string
+          required: true
+          description: Nome do bucket que está efetuando a busca
+        - in: header
+          name: x-prefix
+          schema:
+            type: string
+          required: false
+          description: Caminho até a pasta do bucket que está no momento da consulta
+        - in: header
+          name: x-search-term
+          schema:
+            type: string
+          required: true
+          description: String utilizada para buscar objetos que tenham key ou data que a contenha
+        - in: header
+          name: x-next-continuation-token
+          schema:
+            type: string
+          required: false
+          description: Token que indica o ponto que a busca deve seguir quando uma nova request for feita
+      responses:
+        200:     
+          description: Retorna lista de objetos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchObjectsRes'
+        500:
+          description: Falha ao se conectar com os serviços do s3
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Oops! ocorreu um erro inesperado
+
+           
