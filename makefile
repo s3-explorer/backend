@@ -3,7 +3,7 @@ n ?= 10
 start:
 	docker-compose up -d
 
-	sleep 60
+	sleep 30
 
 	mkdir teste-content
 	mkdir teste-content/folder-01
