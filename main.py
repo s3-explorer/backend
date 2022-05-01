@@ -11,6 +11,7 @@ from src.routes.search_object import search_object
 app = Flask(__name__)
 CORS(app)
 
+DEFAULT_ERROR_RESPONSE = 'Oops! ocorreu um erro inesperado'
 
 @app.route('/api/get_buckets', methods=['GET'])
 def route_get_buckets():
@@ -18,7 +19,7 @@ def route_get_buckets():
         return get_buckets()
     except Exception as e:
         print(e)
-        return 'Oops! ocorreu um erro inesperado', 500
+        return DEFAULT_ERROR_RESPONSE, 500
 
 
 @app.route('/api/get_object_list', methods=['GET'])
@@ -27,7 +28,7 @@ def route_get_object_list():
         return get_object_list()
     except Exception as e:
         print(e)
-        return 'Oops! ocorreu um erro inesperado', 500
+        return DEFAULT_ERROR_RESPONSE, 500
 
 
 @app.route('/api/download_object', methods=['GET'])
@@ -36,7 +37,7 @@ def route_download_object():
         return download_object()
     except Exception as e:
         print(e)
-        return 'Oops! ocorreu um erro inesperado', 500
+        return DEFAULT_ERROR_RESPONSE, 500
 
 
 @app.route('/api/search_object', methods=['GET'])
@@ -45,7 +46,7 @@ def route_search_object():
         return search_object()
     except Exception as e:
         print(e)
-        return 'Oops! ocorreu um erro inesperado', 500
+        return DEFAULT_ERROR_RESPONSE, 500
 
 
 if __name__ == '__main__':
