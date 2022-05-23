@@ -21,4 +21,4 @@ def get_buckets():
             not in constants.buckets_to_not_show.split(',')
         ]
     del s3_client
-    return jsonify(buckets)
+    return buckets

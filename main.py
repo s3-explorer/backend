@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 from src.routes.download_object import download_object
@@ -16,7 +16,7 @@ DEFAULT_ERROR_RESPONSE = 'Oops! ocorreu um erro inesperado'
 @app.route('/api/get_buckets', methods=['GET'])
 def route_get_buckets():
     try:
-        return get_buckets()
+        return jsonify(get_buckets())
     except Exception as e:
         print(e)
         return DEFAULT_ERROR_RESPONSE, 500
