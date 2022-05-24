@@ -1,18 +1,11 @@
 import boto3
 import pandas as pd
-from flask import jsonify, request
 
 from src.utils.constants import get_constants
 
 
-def search_object():
+def search_object(bucket, prefix, search_term, next_continuation_token):
     constants = get_constants()
-    bucket = request.headers.get('x-bucket', False)
-    prefix = request.headers.get('x-prefix', '')
-    search_term = request.headers.get('x-search-term', '')
-    next_continuation_token = request.headers.get(
-        'x-next-continuation-token', False
-    )
 
     if search_term == '':
         return 'Termo de busca inválido', 400
@@ -86,4 +79,4 @@ def search_object():
     del s3_client
     del df_keys
 
-    return jsonify(response_dict)
+    return response_dict

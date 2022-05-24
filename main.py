@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from src.routes.download_object import download_object
@@ -43,7 +43,13 @@ def route_download_object():
 @app.route('/api/search_object', methods=['GET'])
 def route_search_object():
     try:
-        return search_object()
+        bucket = request.headers.get('x-bucket', False)
+        prefix = request.headers.get('x-prefix', '')
+        search_term = request.headers.get('x-search-term', '')
+        next_continuation_token = request.headers.get(
+            'x-next-continuation-token', False
+        )
+        return jsonify(search_object(bucket, prefix, search_term, next_continuation_token))
     except Exception as e:
         print(e)
         return DEFAULT_ERROR_RESPONSE, 500
