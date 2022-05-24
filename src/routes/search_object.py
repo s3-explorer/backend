@@ -2,10 +2,11 @@ import boto3
 import pandas as pd
 from flask import jsonify, request
 
-from src.utils.constants import constants
+from src.utils.constants import get_constants
 
 
 def search_object():
+    constants = get_constants()
     bucket = request.headers.get('x-bucket', False)
     prefix = request.headers.get('x-prefix', '')
     search_term = request.headers.get('x-search-term', '')

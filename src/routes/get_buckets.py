@@ -1,10 +1,12 @@
 import boto3
 from flask import jsonify
 
-from src.utils.constants import constants
+from src.utils.constants import get_constants
+
 
 
 def get_buckets():
+    constants = get_constants()
     s3_client = boto3.client(**constants.client_config)
     response = s3_client.list_buckets()
     if constants.buckets_to_show:

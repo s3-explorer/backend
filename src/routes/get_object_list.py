@@ -4,10 +4,11 @@ import boto3
 import pandas as pd
 from flask import jsonify, request
 
-from src.utils.constants import constants
+from src.utils.constants import get_constants
 
 
 def get_object_list():
+    constants = get_constants()
     bucket = request.headers.get('x-bucket', False)
     prefix = request.headers.get('x-prefix', '')
     next_continuation_token = request.headers.get(

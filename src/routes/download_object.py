@@ -1,11 +1,13 @@
+from asyncio import constants
 import boto3
 from botocore.client import Config
 from flask import request
 
-from src.utils.constants import constants
+from src.utils.constants import get_constants
 
 
 def download_object():
+    constants = get_constants()
     bucket = request.headers.get('x-bucket', False)
     key_name = request.headers.get('x-key-name', '')
 
