@@ -1,27 +1,7 @@
 from src.routes import search_object
 from collections import namedtuple
-from datetime import datetime
-from random import randint
 from pytest import fixture
-
-
-object_keys = [
-    {
-        'Key': f'abc/{f"abc_{i}" if i < 200 else f"xyz_{i}"}.txt',
-        'LastModified': datetime.strptime(f'2022-{str(randint(1,12)).zfill(2)}-{str(randint(1,28)).zfill(2)}', '%Y-%m-%d'),
-        'Size': randint(44,78924),
-    } 
-    for i in range(0,400)
-]
-
-class mock_s3_client:
-    def __init__(self, *args, **kwargs) -> None:
-        ...
-
-    def list_objects_v2(self, *args, **kwargs):
-        return {
-            'Contents': object_keys
-        }
+from test.search_object import mock_s3_client
 
 def mock_get_constants():
     constants = namedtuple(
