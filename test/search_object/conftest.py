@@ -1,11 +1,15 @@
-from src.routes import search_object
 from collections import namedtuple
-from pytest import fixture
 from test.search_object import mock_s3_client
+
+from pytest import fixture
+
+from src.routes import search_object
+
 
 def mock_get_constants():
     constants = namedtuple(
-        'Constants', ['buckets_to_not_show', 'buckets_to_show', 'client_config']
+        'Constants',
+        ['buckets_to_not_show', 'buckets_to_show', 'client_config'],
     )
     buckets_to_not_show = 'xpto'
     buckets_to_show = 'xpto'

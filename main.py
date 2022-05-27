@@ -13,6 +13,7 @@ CORS(app)
 
 DEFAULT_ERROR_RESPONSE = 'Oops! ocorreu um erro inesperado'
 
+
 @app.route('/api/get_buckets', methods=['GET'])
 def route_get_buckets():
     try:
@@ -55,7 +56,9 @@ def route_search_object():
         if not bucket:
             return 'Bucket inválido', 400
 
-        return jsonify(search_object(bucket, prefix, search_term, next_continuation_token))
+        return jsonify(
+            search_object(bucket, prefix, search_term, next_continuation_token)
+        )
     except Exception as e:
         print(e)
         return DEFAULT_ERROR_RESPONSE, 500

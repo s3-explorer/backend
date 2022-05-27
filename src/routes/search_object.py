@@ -8,29 +8,30 @@ def search_object(bucket, prefix, search_term, next_continuation_token):
     constants = get_constants()
     s3_client = boto3.client(**constants.client_config)
 
-    df_keys, next_continuation_token = get_50_objects_or_more(s3_client, bucket, prefix, search_term, next_continuation_token)
-    
+    df_keys, next_continuation_token = get_50_objects_or_more(
+        s3_client, bucket, prefix, search_term, next_continuation_token
+    )
+
     if df_keys.shape[0] == 0:
-        return {
-            'next_continuation_token': False,
-            'objects': []
-        }
-    
+        return {'next_continuation_token': False, 'objects': []}
+
     df_keys = prepare_response(df_keys)
 
     return {
         'next_continuation_token': next_continuation_token,
-        'objects': df_keys.to_dict('records')
+        'objects': df_keys.to_dict('records'),
     }
 
-def get_50_objects_or_more(s3_client, bucket, prefix, search_term, next_continuation_token):
-    list_objects_config = {
-        'Bucket': bucket, 
-        'Prefix': prefix
-    }
+
+def get_50_objects_or_more(
+    s3_client, bucket, prefix, search_term, next_continuation_token
+):
+    list_objects_config = {'Bucket': bucket, 'Prefix': prefix}
 
     if next_continuation_token:
-        list_objects_config['next_continuation_token'] = next_continuation_token
+        list_objects_config[
+            'next_continuation_token'
+        ] = next_continuation_token
 
     df = pd.DataFrame()
 
@@ -42,7 +43,7 @@ def get_50_objects_or_more(s3_client, bucket, prefix, search_term, next_continua
             return pd.DataFrame(), next_continuation_token
 
         df_keys = pd.DataFrame(keys)
-        
+
         df_keys.loc[:, 'tmp_key'] = df_keys.loc[:, 'Key'].str.replace(
             f'^{prefix}', '', regex=True
         )
@@ -64,13 +65,16 @@ def get_50_objects_or_more(s3_client, bucket, prefix, search_term, next_continua
         if df_keys.shape[0] >= 50 or not next_continuation_token:
             break
 
-    return df.rename(
-        columns={
-            'Key': 'key',
-            'LastModified': 'last_modified',
-            'Size': 'size',
-        }
-    ), next_continuation_token
+    return (
+        df.rename(
+            columns={
+                'Key': 'key',
+                'LastModified': 'last_modified',
+                'Size': 'size',
+            }
+        ),
+        next_continuation_token,
+    )
 
 
 def prepare_response(df_keys):

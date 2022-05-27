@@ -1,10 +1,12 @@
 import os
 from collections import namedtuple
 
+
 def get_constants():
 
     Constants = namedtuple(
-        'Constants', ['buckets_to_not_show', 'buckets_to_show', 'client_config']
+        'Constants',
+        ['buckets_to_not_show', 'buckets_to_show', 'client_config'],
     )
 
     buckets_to_not_show = os.getenv('BUCKETS_TO_NOT_SHOW', '')

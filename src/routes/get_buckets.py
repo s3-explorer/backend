@@ -1,6 +1,6 @@
 import boto3
-from src.utils.constants import get_constants
 
+from src.utils.constants import get_constants
 
 
 def get_buckets():
