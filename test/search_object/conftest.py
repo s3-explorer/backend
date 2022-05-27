@@ -1,6 +1,18 @@
 from src.routes import search_object
 from collections import namedtuple
 from datetime import datetime
+from random import randint
+from pytest import fixture
+
+
+object_keys = [
+    {
+        'Key': f'abc/{f"abc_{i}" if i < 200 else f"xyz_{i}"}.txt',
+        'LastModified': datetime.strptime(f'2022-{str(randint(1,12)).zfill(2)}-{str(randint(1,28)).zfill(2)}', '%Y-%m-%d'),
+        'Size': randint(44,78924),
+    } 
+    for i in range(0,400)
+]
 
 class mock_s3_client:
     def __init__(self, *args, **kwargs) -> None:
@@ -8,13 +20,7 @@ class mock_s3_client:
 
     def list_objects_v2(self, *args, **kwargs):
         return {
-            'Contents': [
-                {
-                    'Key': 'abc/abc.txt',
-                    'LastModified': datetime.strptime('2022-05-04', '%Y-%m-%d'),
-                    'Size': 44,
-                }
-            ]
+            'Contents': object_keys
         }
 
 def mock_get_constants():
@@ -32,15 +38,7 @@ def mock_get_constants():
     return constants(buckets_to_not_show, buckets_to_show, client_config)
 
 
-def test_if_test_filters_the_abc_file(monkeypatch):
+@fixture
+def pre_test(monkeypatch):
     monkeypatch.setattr(search_object, 'get_constants', mock_get_constants)
     monkeypatch.setattr(search_object.boto3, 'client', mock_s3_client)
-
-    bucket = 'abc'
-    prefix = 'abc'
-    search_term = 'abc'
-    next_continuation_token = False
-
-    res = search_object.search_object(bucket, prefix, search_term, next_continuation_token)
-    
-    assert res == {'next_continuation_token': False, 'objects': [{'name': 'abc.txt', 'last_modified': '2022-05-04', 'size': 44, 'key': 'abc/abc.txt'}]}

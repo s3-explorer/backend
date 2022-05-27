@@ -6,47 +6,51 @@ from src.utils.constants import get_constants
 
 def search_object(bucket, prefix, search_term, next_continuation_token):
     constants = get_constants()
+    s3_client = boto3.client(**constants.client_config)
 
-    if search_term == '':
-        return 'Termo de busca inválido', 400
-    if not bucket:
-        return 'Bucket inválido', 400
+    df_keys, next_continuation_token = get_50_objects_or_more(s3_client, bucket, prefix, search_term, next_continuation_token)
+    
+    if df_keys.shape[0] == 0:
+        return {
+            'next_continuation_token': False,
+            'objects': []
+        }
+    
+    df_keys = prepare_response(df_keys)
 
-    df_keys = pd.DataFrame()
+    return {
+        'next_continuation_token': next_continuation_token,
+        'objects': df_keys.to_dict('records')
+    }
 
-    list_objects_config = {'Bucket': bucket, 'Prefix': prefix}
+def get_50_objects_or_more(s3_client, bucket, prefix, search_term, next_continuation_token):
+    list_objects_config = {
+        'Bucket': bucket, 
+        'Prefix': prefix
+    }
+
+    if next_continuation_token:
+        list_objects_config['next_continuation_token'] = next_continuation_token
+
+    df = pd.DataFrame()
+
     while True:
-        if next_continuation_token:
-            list_objects_config['ContinuationToken'] = next_continuation_token
-
-        s3_client = boto3.client(**constants.client_config)
         response = s3_client.list_objects_v2(**list_objects_config)
         keys = response.get('Contents', [])
 
         if len(keys) == 0:
-            response_dict = {'next_continuation_token': False}
-            response_dict['objects'] = []
-            return jsonify(response_dict)
+            return pd.DataFrame(), next_continuation_token
 
-        df_keys = df_keys.append(
-            pd.DataFrame(keys)
-            .loc[:, ['Key', 'LastModified', 'Size']]
-            .rename(
-                columns={
-                    'Key': 'key',
-                    'LastModified': 'last_modified',
-                    'Size': 'size',
-                }
-            ),
-            ignore_index=True,
-        )
-
-        df_keys.loc[:, 'tmp_key'] = df_keys.loc[:, 'key'].str.replace(
+        df_keys = pd.DataFrame(keys)
+        
+        df_keys.loc[:, 'tmp_key'] = df_keys.loc[:, 'Key'].str.replace(
             f'^{prefix}', '', regex=True
         )
+
         df_keys.loc[:, 'tmp_key'] = df_keys.loc[:, 'tmp_key'] + df_keys.loc[
-            :, 'last_modified'
+            :, 'LastModified'
         ].dt.tz_localize(None).astype('str')
+
         df_keys = df_keys.loc[
             df_keys.loc[:, 'tmp_key']
             .str.lower()
@@ -54,10 +58,22 @@ def search_object(bucket, prefix, search_term, next_continuation_token):
             :,
         ].reset_index(drop=True)
 
+        df = pd.concat([df, df_keys], ignore_index=True)
+
         next_continuation_token = response.get('NextContinuationToken', False)
         if df_keys.shape[0] >= 50 or not next_continuation_token:
             break
 
+    return df.rename(
+        columns={
+            'Key': 'key',
+            'LastModified': 'last_modified',
+            'Size': 'size',
+        }
+    ), next_continuation_token
+
+
+def prepare_response(df_keys):
     df_keys.loc[:, 'name'] = df_keys.loc[:, 'key'].str.split('/').str[-1]
     df_keys.loc[:, 'last_modified'] = df_keys.loc[
         :, 'last_modified'
@@ -73,10 +89,4 @@ def search_object(bucket, prefix, search_term, next_continuation_token):
         'str'
     )
     df_keys.loc[df_keys.loc[:, 'last_modified'] == 'NaT', 'last_modified'] = ''
-
-    response_dict = {'next_continuation_token': next_continuation_token}
-    response_dict['objects'] = df_keys.to_dict('records')
-    del s3_client
-    del df_keys
-
-    return response_dict
+    return df_keys
