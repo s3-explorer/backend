@@ -22,5 +22,7 @@ start:
 
 	rm -r teste-content
 
+	./.venv/bin/python main.py
+
 build:
 	docker build -t lucasfdutra/s3-explorer-back .
