@@ -49,6 +49,12 @@ def route_search_object():
         next_continuation_token = request.headers.get(
             'x-next-continuation-token', False
         )
+
+        if search_term == '':
+            return 'Termo de busca inválido', 400
+        if not bucket:
+            return 'Bucket inválido', 400
+
         return jsonify(search_object(bucket, prefix, search_term, next_continuation_token))
     except Exception as e:
         print(e)
