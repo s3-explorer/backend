@@ -1,6 +1,4 @@
 import boto3
-from flask import jsonify
-
 from src.utils.constants import get_constants
 
 
